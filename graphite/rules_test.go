@@ -87,6 +87,7 @@ func TestUnmatchedMetricPathsFromMetric(t *testing.T) {
 }
 
 func TestTemplatedPathsFromMetric(t *testing.T) {
+	emptyPathsCache()
 	expected := make([]string, 0)
 	expected = append(expected, "tmpl_1.data%2Efoo.team-X")
 	actual := pathsFromMetric(metric, "", testConfig.Rules, testConfig.Template_data)

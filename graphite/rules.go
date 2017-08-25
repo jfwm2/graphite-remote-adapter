@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"sync"
 
 	"github.com/prometheus/common/log"
 	"github.com/prometheus/common/model"
@@ -26,6 +27,17 @@ import (
 	"github.com/criteo/graphite-remote-adapter/graphite/config"
 	"github.com/criteo/graphite-remote-adapter/graphite/utils"
 )
+
+var (
+	paths_cache       = make(map[model.Fingerprint][]string)
+	paths_cache_mutex = &sync.Mutex{}
+)
+
+func emptyPathsCache() {
+	paths_cache_mutex.Lock()
+	paths_cache = make(map[model.Fingerprint][]string)
+	paths_cache_mutex.Unlock()
+}
 
 func loadContext(template_data map[string]interface{}, m model.Metric) map[string]interface{} {
 	ctx := make(map[string]interface{})
@@ -55,12 +67,20 @@ func match(m model.Metric, match config.LabelSet, matchRE config.LabelSetRE) boo
 }
 
 func pathsFromMetric(m model.Metric, prefix string, rules []*config.Rule, template_data map[string]interface{}) []string {
+	paths_cache_mutex.Lock()
+	cached_paths, cached := paths_cache[m.Fingerprint()]
+	paths_cache_mutex.Unlock()
+	if cached {
+		return cached_paths
+	}
 	paths, skipped := templatedPaths(m, rules, template_data)
 	// if it doesn't match any rule, use default path
 	if len(paths) == 0 && !skipped {
 		paths = append(paths, defaultPath(m, prefix))
 	}
-
+	paths_cache_mutex.Lock()
+	paths_cache[m.Fingerprint()] = paths
+	paths_cache_mutex.Unlock()
 	return paths
 }
 
