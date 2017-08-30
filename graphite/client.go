@@ -69,9 +69,9 @@ func NewClient(carbon string, carbon_transport string, write_timeout time.Durati
 		}
 	}
 	if usePathsCache {
-		fmt.Printf("usePathsCache = %t\n", usePathsCache)
-		fmt.Printf("pathsCacheExpiration = %s\n", pathsCacheExpiration.String())
-		fmt.Printf("pathsCachePurge = %s\n", pathsCachePurge.String())
+		// fmt.Printf("usePathsCache = %t\n", usePathsCache)
+		// fmt.Printf("pathsCacheExpiration = %s\n", pathsCacheExpiration.String())
+		// fmt.Printf("pathsCachePurge = %s\n", pathsCachePurge.String())
 		initPathsCache(pathsCacheExpiration, pathsCachePurge)
 	}
 	return &Client{

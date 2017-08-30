@@ -136,7 +136,7 @@ func parseFlags() *config {
 	flag.StringVar(&cfg.listenAddr, "web.listen-address", ":9201", "Address to listen on for web endpoints.")
 	flag.StringVar(&cfg.telemetryPath, "web.telemetry-path", "/metrics", "Address to listen on for web endpoints.")
 	flag.BoolVar(&cfg.usePathsCache, "use-paths-cache", false,
-		"Whether to use a cache to store metrics paths lists or not.",
+		"Whether to use a cache to store metrics paths lists or not. (default false)",
 	)
 	flag.DurationVar(&cfg.pathsCacheExpiration, "paths-cache-expiration", 3600*time.Second,
 		"Expiration of items within the paths cache",
@@ -165,9 +165,9 @@ func buildClients(cfg *config) ([]writer, []reader) {
 	var writers []writer
 	var readers []reader
 	if cfg.carbonAddress != "" || cfg.graphiteWebURL != "" {
-		fmt.Printf("cfg.usePathsCache = %t\n", cfg.usePathsCache)
-		fmt.Printf("cfg.pathsCacheExpiration = %s\n", cfg.pathsCacheExpiration.String())
-		fmt.Printf("cfg.pathsCachePurge = %s\n", cfg.pathsCachePurge.String())
+		// fmt.Printf("cfg.usePathsCache = %t\n", cfg.usePathsCache)
+		// fmt.Printf("cfg.pathsCacheExpiration = %s\n", cfg.pathsCacheExpiration.String())
+		// fmt.Printf("cfg.pathsCachePurge = %s\n", cfg.pathsCachePurge.String())
 		c := graphite.NewClient(
 			cfg.carbonAddress, cfg.carbonTransport, cfg.remoteWriteTimeout,
 			cfg.graphiteWebURL, cfg.remoteReadTimeout,

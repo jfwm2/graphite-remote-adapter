@@ -38,7 +38,7 @@ var (
 func initPathsCache(pathsCacheExpiration time.Duration, pathsCachePurge time.Duration) {
 	paths_cache = cache.New(pathsCacheExpiration, pathsCachePurge)
 	paths_cache_enabled = true
-	fmt.Printf("Cache initialized with expiration of %s and purge of %s\n", pathsCacheExpiration.String(), pathsCachePurge.String())
+	log.Infof("Paths cache initialized with %s expiration duration and %s cleanup interval", pathsCacheExpiration.String(), pathsCachePurge.String())
 }
 
 func loadContext(template_data map[string]interface{}, m model.Metric) map[string]interface{} {
