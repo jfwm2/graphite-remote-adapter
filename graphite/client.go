@@ -125,7 +125,7 @@ func (c *Client) Write(samples model.Samples) error {
 		for _, k := range paths {
 			if str := c.prepareDataPoint(k, s); str != "" {
 				fmt.Fprint(&buf, str)
-				fmt.Printf("point: " + str)
+				// fmt.Printf("point: " + str)
 			}
 		}
 	}

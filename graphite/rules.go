@@ -69,12 +69,12 @@ func match(m model.Metric, match config.LabelSet, matchRE config.LabelSetRE) boo
 }
 
 func pathsFromMetric(m model.Metric, prefix string, rules []*config.Rule, template_data map[string]interface{}) []string {
-        fmt.Println("\nProcessing metric " + m.String() + " (" + m.Fingerprint().String() + ")")
+        // fmt.Println("\nProcessing metric " + m.String() + " (" + m.Fingerprint().String() + ")")
 	if paths_cache_enabled {
 		cached_assertion, cached := paths_cache.Get(m.Fingerprint().String())
 		if cached {
-			fmt.Println("Metric " + m.String() + " already in cache")
-			fmt.Printf("Returned cached paths: %v\n", cached_assertion.([]string))
+			// fmt.Println("Metric " + m.String() + " already in cache")
+			// fmt.Printf("Returned cached paths: %v\n", cached_assertion.([]string))
 			return cached_assertion.([]string)
 		}
 	}
@@ -85,9 +85,9 @@ func pathsFromMetric(m model.Metric, prefix string, rules []*config.Rule, templa
 	}
 	if paths_cache_enabled {
 		paths_cache.Set(m.Fingerprint().String(), paths, cache.DefaultExpiration)
-		fmt.Println("Metric " + m.String() + " added to cache")
+		// fmt.Println("Metric " + m.String() + " added to cache")
 	}
-	fmt.Printf("Returned paths: %v\n", paths)
+	// fmt.Printf("Returned paths: %v\n", paths)
 	return paths
 }
 
