@@ -31,14 +31,14 @@ import (
 )
 
 var (
-	paths_cache *cache.Cache
+	paths_cache         *cache.Cache
 	paths_cache_enabled = false
 )
 
 func initPathsCache(pathsCacheExpiration time.Duration, pathsCachePurge time.Duration) {
 	paths_cache = cache.New(pathsCacheExpiration, pathsCachePurge)
 	paths_cache_enabled = true
-        fmt.Printf("Cache initialized with expiration of %s and purge of %s\n", pathsCacheExpiration.String(), pathsCachePurge.String())
+	fmt.Printf("Cache initialized with expiration of %s and purge of %s\n", pathsCacheExpiration.String(), pathsCachePurge.String())
 }
 
 func loadContext(template_data map[string]interface{}, m model.Metric) map[string]interface{} {
@@ -69,7 +69,7 @@ func match(m model.Metric, match config.LabelSet, matchRE config.LabelSetRE) boo
 }
 
 func pathsFromMetric(m model.Metric, prefix string, rules []*config.Rule, template_data map[string]interface{}) []string {
-        // fmt.Println("\nProcessing metric " + m.String() + " (" + m.Fingerprint().String() + ")")
+	// fmt.Println("\nProcessing metric " + m.String() + " (" + m.Fingerprint().String() + ")")
 	if paths_cache_enabled {
 		cached_assertion, cached := paths_cache.Get(m.Fingerprint().String())
 		if cached {
