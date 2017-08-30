@@ -165,9 +165,6 @@ func buildClients(cfg *config) ([]writer, []reader) {
 	var writers []writer
 	var readers []reader
 	if cfg.carbonAddress != "" || cfg.graphiteWebURL != "" {
-		// fmt.Printf("cfg.usePathsCache = %t\n", cfg.usePathsCache)
-		// fmt.Printf("cfg.pathsCacheExpiration = %s\n", cfg.pathsCacheExpiration.String())
-		// fmt.Printf("cfg.pathsCachePurge = %s\n", cfg.pathsCachePurge.String())
 		c := graphite.NewClient(
 			cfg.carbonAddress, cfg.carbonTransport, cfg.remoteWriteTimeout,
 			cfg.graphiteWebURL, cfg.remoteReadTimeout,
