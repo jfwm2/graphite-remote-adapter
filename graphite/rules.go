@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
-	"sync"
+	"time"
 
 	"github.com/prometheus/common/log"
 	"github.com/prometheus/common/model"
@@ -26,17 +26,19 @@ import (
 
 	"github.com/criteo/graphite-remote-adapter/graphite/config"
 	"github.com/criteo/graphite-remote-adapter/graphite/utils"
+
+	"github.com/patrickmn/go-cache"
 )
 
 var (
-	paths_cache       = make(map[model.Fingerprint][]string)
-	paths_cache_mutex = &sync.Mutex{}
+	paths_cache *cache.Cache
+	paths_cache_enabled = false
 )
 
-func emptyPathsCache() {
-	paths_cache_mutex.Lock()
-	paths_cache = make(map[model.Fingerprint][]string)
-	paths_cache_mutex.Unlock()
+func initPathsCache(pathsCacheExpiration time.Duration, pathsCachePurge time.Duration) {
+	paths_cache = cache.New(pathsCacheExpiration, pathsCachePurge)
+	paths_cache_enabled = true
+        fmt.Printf("Cache initialized with expiration of %s and purge of %s\n", pathsCacheExpiration.String(), pathsCachePurge.String())
 }
 
 func loadContext(template_data map[string]interface{}, m model.Metric) map[string]interface{} {
@@ -67,20 +69,25 @@ func match(m model.Metric, match config.LabelSet, matchRE config.LabelSetRE) boo
 }
 
 func pathsFromMetric(m model.Metric, prefix string, rules []*config.Rule, template_data map[string]interface{}) []string {
-	paths_cache_mutex.Lock()
-	cached_paths, cached := paths_cache[m.Fingerprint()]
-	paths_cache_mutex.Unlock()
-	if cached {
-		return cached_paths
+        fmt.Println("\nProcessing metric " + m.String() + " (" + m.Fingerprint().String() + ")")
+	if paths_cache_enabled {
+		cached_assertion, cached := paths_cache.Get(m.Fingerprint().String())
+		if cached {
+			fmt.Println("Metric " + m.String() + " already in cache")
+			fmt.Printf("Returned cached paths: %v\n", cached_assertion.([]string))
+			return cached_assertion.([]string)
+		}
 	}
 	paths, skipped := templatedPaths(m, rules, template_data)
 	// if it doesn't match any rule, use default path
 	if len(paths) == 0 && !skipped {
 		paths = append(paths, defaultPath(m, prefix))
 	}
-	paths_cache_mutex.Lock()
-	paths_cache[m.Fingerprint()] = paths
-	paths_cache_mutex.Unlock()
+	if paths_cache_enabled {
+		paths_cache.Set(m.Fingerprint().String(), paths, cache.DefaultExpiration)
+		fmt.Println("Metric " + m.String() + " added to cache")
+	}
+	fmt.Printf("Returned paths: %v\n", paths)
 	return paths
 }
 

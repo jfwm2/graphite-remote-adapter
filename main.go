@@ -36,16 +36,19 @@ import (
 )
 
 type config struct {
-	configFile         string
-	carbonAddress      string
-	carbonTransport    string
-	graphiteWebURL     string
-	graphitePrefix     string
-	remoteReadTimeout  time.Duration
-	remoteWriteTimeout time.Duration
-	remoteReadDelay    time.Duration
-	listenAddr         string
-	telemetryPath      string
+	configFile           string
+	carbonAddress        string
+	carbonTransport      string
+	graphiteWebURL       string
+	graphitePrefix       string
+	remoteReadTimeout    time.Duration
+	remoteWriteTimeout   time.Duration
+	remoteReadDelay      time.Duration
+	listenAddr           string
+	telemetryPath        string
+	usePathsCache        bool
+	pathsCacheExpiration time.Duration
+	pathsCachePurge      time.Duration
 }
 
 var (
@@ -132,6 +135,15 @@ func parseFlags() *config {
 	)
 	flag.StringVar(&cfg.listenAddr, "web.listen-address", ":9201", "Address to listen on for web endpoints.")
 	flag.StringVar(&cfg.telemetryPath, "web.telemetry-path", "/metrics", "Address to listen on for web endpoints.")
+	flag.BoolVar(&cfg.usePathsCache, "use-paths-cache", false,
+		"Whether to use a cache to store metrics paths lists or not.",
+	)
+	flag.DurationVar(&cfg.pathsCacheExpiration, "paths-cache-expiration", 3600*time.Second,
+		"Expiration of items within the paths cache",
+	)
+	flag.DurationVar(&cfg.pathsCachePurge, "paths-cache-purge", 2*cfg.pathsCacheExpiration,
+		"Frequency of purge for expired items in the paths cache",
+	)
 
 	flag.Parse()
 
@@ -153,11 +165,15 @@ func buildClients(cfg *config) ([]writer, []reader) {
 	var writers []writer
 	var readers []reader
 	if cfg.carbonAddress != "" || cfg.graphiteWebURL != "" {
+		fmt.Printf("cfg.usePathsCache = %t\n", cfg.usePathsCache)
+		fmt.Printf("cfg.pathsCacheExpiration = %s\n", cfg.pathsCacheExpiration.String())
+		fmt.Printf("cfg.pathsCachePurge = %s\n", cfg.pathsCachePurge.String())
 		c := graphite.NewClient(
 			cfg.carbonAddress, cfg.carbonTransport, cfg.remoteWriteTimeout,
 			cfg.graphiteWebURL, cfg.remoteReadTimeout,
 			cfg.graphitePrefix, cfg.configFile,
-			cfg.remoteReadDelay)
+			cfg.remoteReadDelay, cfg.usePathsCache,
+			cfg.pathsCacheExpiration, cfg.pathsCachePurge)
 		if c != nil {
 			writers = append(writers, c)
 			readers = append(readers, c)
