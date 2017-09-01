@@ -136,13 +136,13 @@ func parseFlags() *config {
 	flag.StringVar(&cfg.listenAddr, "web.listen-address", ":9201", "Address to listen on for web endpoints.")
 	flag.StringVar(&cfg.telemetryPath, "web.telemetry-path", "/metrics", "Address to listen on for web endpoints.")
 	flag.BoolVar(&cfg.usePathsCache, "use-paths-cache", false,
-		"Whether to use a cache to store metrics paths lists or not. (default false)",
+		"Use a cache to store metrics paths lists.",
 	)
 	flag.DurationVar(&cfg.pathsCacheExpiration, "paths-cache-expiration", 3600*time.Second,
-		"Expiration of items within the paths cache",
+		"Expiration of items within the paths cache.",
 	)
 	flag.DurationVar(&cfg.pathsCachePurge, "paths-cache-purge", 2*cfg.pathsCacheExpiration,
-		"Frequency of purge for expired items in the paths cache",
+		"Frequency of purge for expired items in the paths cache.",
 	)
 
 	flag.Parse()
